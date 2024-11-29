@@ -1,25 +1,17 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {BOARD_SIZE, MAX_QUEENS} from '../../utils/constants';
-import {GameState, Position} from '../../types/game';
-import {isValidQueenPlacement} from '../../utils/validation';
-
-const initialBoard = Array(BOARD_SIZE)
-  .fill(null)
-  .map((_, row) =>
-    Array(BOARD_SIZE)
-      .fill(null)
-      .map((_, col) => ({
-        position: {row, col},
-        hasQueen: false,
-        isValid: true,
-      })),
-  );
+import {GameState, Cell, BoardSize, Complexity} from '../../types/game';
+import {RegionGenerator} from '../../utils/regionGenerator';
+import {BOARD_SIZE} from '../../utils/constants';
 
 const initialState: GameState = {
-  board: initialBoard,
+  board: Array(BOARD_SIZE)
+    .fill(0)
+    .map(() => Array(BOARD_SIZE).fill(-1)),
+  regions: [],
   queens: [],
-  queensPlaced: 0,
-  isComplete: false,
+  moveHistory: [],
+  selectedQueen: null,
+  gameStatus: 'playing',
   moves: 0,
 };
 
@@ -27,24 +19,80 @@ const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    placeQueen: (state, action: PayloadAction<Position>) => {
+    generateRegions: (
+      state,
+      action: PayloadAction<{
+        boardSize: BoardSize;
+        complexity: Complexity;
+      }>,
+    ) => {
+      const {boardSize, complexity} = action.payload;
+      const generator = new RegionGenerator(boardSize, {
+        minRegionSize: boardSize - 1,
+        maxRegionSize: boardSize + 1,
+        complexity,
+      });
+
+      const {regions, board} = generator.generateRegions();
+      state.regions = regions;
+      state.board = board;
+      state.queens = [];
+      state.moveHistory = [];
+      state.selectedQueen = null;
+      state.gameStatus = 'playing';
+      state.moves = 0;
+    },
+
+    placeQueen: (state, action: PayloadAction<Cell>) => {
       const {row, col} = action.payload;
 
-      if (state.queensPlaced >= MAX_QUEENS) {
-        return;
-      }
+      // Add the queen to the queens array
+      state.queens.push({row, col});
+      state.moveHistory.push({row, col});
+      state.moves += 1;
 
-      if (isValidQueenPlacement(state.queens, {row, col})) {
-        state.board[row][col].hasQueen = true;
-        state.queens.push({row, col});
-        state.queensPlaced += 1;
-        state.moves += 1;
-        state.isComplete = state.queensPlaced === MAX_QUEENS;
+      // Check if the game is won
+      if (state.queens.length === BOARD_SIZE) {
+        state.gameStatus = 'won';
       }
     },
-    resetGame: () => initialState,
+
+    removeQueen: (state, action: PayloadAction<Cell>) => {
+      const {row, col} = action.payload;
+      state.queens = state.queens.filter(
+        queen => queen.row !== row || queen.col !== col,
+      );
+    },
+
+    resetGame: state => {
+      state.queens = [];
+      state.moveHistory = [];
+      state.selectedQueen = null;
+      state.gameStatus = 'playing';
+      state.moves = 0;
+    },
+
+    selectQueen: (state, action: PayloadAction<Cell | null>) => {
+      state.selectedQueen = action.payload;
+    },
+
+    undoMove: state => {
+      if (state.queens.length > 0) {
+        state.queens.pop();
+        state.moveHistory.pop();
+        state.moves -= 1;
+        state.gameStatus = 'playing';
+      }
+    },
   },
 });
 
-export const {placeQueen, resetGame} = gameSlice.actions;
+export const {
+  generateRegions,
+  placeQueen,
+  removeQueen,
+  resetGame,
+  selectQueen,
+  undoMove,
+} = gameSlice.actions;
 export default gameSlice.reducer;

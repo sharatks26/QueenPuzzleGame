@@ -16,19 +16,19 @@ The Queen Puzzle Game is inspired by the classic "8 Queens Puzzle," where player
 
 ## Development Phases
 
-### Phase 1: **Project Setup**
-1. **Set up React Native Environment**:
-   - Ensure Node.js, npm, and React Native CLI are installed.
-   - Initialize the project: `npx react-native init QueenPuzzleGame`.
-   - Set up testing devices/emulators for both iOS and Android.
+### Phase 1: ✅ **Project Setup** (COMPLETED)
+1. ✅ **Set up React Native Environment**:
+   - ✅ Ensure Node.js, npm, and React Native CLI are installed.
+   - ✅ Initialize the project: `npx react-native init QueenPuzzleGame`.
+   - ✅ Set up testing devices/emulators for both iOS and Android.
    
-2. **Install Dependencies**:
-   - UI Library: `react-native-paper` or `react-native-elements`.
-   - Drag-and-Drop Library: `react-native-draggable`.
-   - State Management: `redux` or `@reduxjs/toolkit` for global game state.
-   - Optional Animations: `react-native-reanimated`.
+2. ✅ **Install Dependencies**:
+   - ✅ UI Library: `react-native-paper` or `react-native-elements`.
+   - ✅ Drag-and-Drop Library: `react-native-draggable`.
+   - ✅ State Management: `redux` or `@reduxjs/toolkit` for global game state.
+   - ✅ Optional Animations: `react-native-reanimated`.
 
-3. **Define Basic Folder Structure**:
+3. ✅ **Define Basic Folder Structure**:
    ```
    /src
    ├── components
@@ -51,26 +51,58 @@ The Queen Puzzle Game is inspired by the classic "8 Queens Puzzle," where player
        └── constants.js
    ```
 
----
+### Phase 2: 🚧 **Color Region Queens Puzzle** (IN PROGRESS)
+1. **Enhanced Board Design**:
+   - Create colored regions on the board (each region with unique color).
+   - For 9x9 board, design 9 distinct regions with different shapes and sizes.
+   - Ensure colors are visually distinguishable and accessibility-friendly.
 
-### Phase 2: **Build Core Features**
-1. **Chessboard UI**:
-   - Create an 8x8 grid layout using `FlatList` or `View` components.
-   - Style the grid with alternating light/dark squares to mimic a chessboard.
+2. **Region Generation System**:
+   - Implement a random region generation algorithm:
+     - Start with random seed points on the board
+     - Use flood-fill or growth algorithms to expand regions
+     - Ensure each region has 9 squares (for 9x9 board)
+   - Region Shape Requirements:
+     - Regions can be irregular shapes
+     - All squares in a region must be connected
+     - Support various patterns: L-shapes, T-shapes, zigzags, etc.
+     - Allow regions to wrap around other regions
+   - Region Generation Controls:
+     - Set minimum/maximum region size
+     - Control region complexity (simple vs intricate shapes)
+     - Ensure generated patterns are solvable
 
-2. **Queen Component**:
-   - Design a draggable queen using the `react-native-draggable` library.
-   - Add basic styling to represent a queen.
+3. **Region Management**:
+   - Create a data structure to map squares to their respective regions
+   - Implement region validation and connectivity checks
+   - Store region patterns for replay or sharing
+   - Add difficulty rating system based on region complexity
 
-3. **Drag-and-Drop Functionality**:
-   - Enable drag-and-drop mechanics to place queens on valid grid positions.
-   - Snap the queen to the nearest square after dropping.
+4. **Updated Game Logic**:
+   - Modify validation to include region-based rules:
+     - Only one queen per region regardless of shape
+     - Maintain existing row/column/diagonal constraints
+   - Track placed queens by both position and region
+   - Add special validation for wrapped regions
 
-4. **Placement Validation**:
-   - Implement logic in `validation.js` to check:
-     - No queens in the same row or column.
-     - No queens in the same diagonal.
-   - Provide feedback (e.g., highlight invalid squares).
+5. **UI Enhancements for Regions**:
+   - Add visual distinction between adjacent irregular regions
+   - Implement hover effects that highlight entire irregular regions
+   - Show region completion status
+   - Add visual feedback for invalid placements
+   - Animate region generation process (optional)
+
+6. **Difficulty Levels Based on Region Shapes**:
+   - Easy: Regular, rectangular regions
+   - Medium: Simple L-shapes and T-shapes
+   - Hard: Complex irregular shapes with wrapping
+   - Expert: Highly irregular patterns with minimal region size differences
+
+7. **Region Pattern Management**:
+   - Save interesting region patterns
+   - Allow sharing of region patterns via codes
+   - Generate daily challenges with unique region layouts
+   - Create a rating system for pattern difficulty
 
 ---
 
@@ -140,6 +172,10 @@ The Queen Puzzle Game is inspired by the classic "8 Queens Puzzle," where player
 - Include a leaderboard to rank players by completion time.
 - Introduce multiplayer or competitive modes.
 - Add a tutorial for new players.
+- Generate custom region patterns using AI/algorithms
+- Allow players to create and share their own region patterns
+- Add a daily challenge with unique region layouts
+- Implement a hint system that considers both classic rules and region constraints
 
 ---
 
@@ -147,7 +183,8 @@ The Queen Puzzle Game is inspired by the classic "8 Queens Puzzle," where player
 | Phase                  | Estimated Time  |
 |------------------------|-----------------|
 | Project Setup          | 2-3 days        |
-| Core Features          | 5-7 days        |
+| Classic Queens Game    | 5-7 days        |
+| Color Region Queens    | 7-10 days       |
 | Gameplay Enhancements  | 4-6 days        |
 | UI/UX Enhancements     | 3-5 days        |
 | Testing & Optimization | 4-6 days        |
