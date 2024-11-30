@@ -1,5 +1,5 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, View, Text} from 'react-native';
+import {SafeAreaView, StyleSheet, View} from 'react-native';
 import {Provider} from 'react-redux';
 import {store} from './src/redux/store';
 import Chessboard from './src/components/Chessboard';
@@ -11,7 +11,6 @@ const App = () => {
     <Provider store={store}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
-          <Text style={styles.debugText}>App Loaded</Text>
           <Chessboard />
         </View>
       </SafeAreaView>

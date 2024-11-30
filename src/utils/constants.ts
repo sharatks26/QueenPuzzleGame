@@ -8,13 +8,13 @@ export const COLORS = {
   DANGER: '#E74C3C',
   SUCCESS: '#2ECC71',
   REGIONS: [
-    '#FF6B6B', // Red
-    '#4ECDC4', // Turquoise
-    '#45B7D1', // Blue
-    '#96CEB4', // Green
-    '#FFEEAD', // Yellow
+    '#fe7a5b', // Red
+    '#dfdfdf', // Turquoise
+    '#97beff', // Blue
+    '#b4dea0', // Green
+    '#ffc993', // Yellow
     '#D4A5A5', // Pink
-    '#9B59B6', // Purple
+    '#baa1e5', // Purple
     '#3498DB', // Light Blue
     '#E67E22', // Orange
   ],

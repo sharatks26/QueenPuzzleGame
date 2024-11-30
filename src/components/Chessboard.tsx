@@ -1,12 +1,5 @@
 import React, {useEffect} from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  Text,
-  TouchableOpacity,
-  Platform,
-} from 'react-native';
+import {View, StyleSheet, Dimensions, Text, Platform} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {RootState} from '../redux/store';
 import {COLORS, BOARD_SIZE} from '../utils/constants';
@@ -18,6 +11,8 @@ import {
   undoMove,
 } from '../redux/slices/gameSlice';
 import {isValidQueenPlacement} from '../utils/validation';
+import BoardSquare from './BoardSquare';
+import GameControls from './GameControls';
 
 const windowWidth = Dimensions.get('window').width;
 const SQUARE_SIZE = Math.floor((windowWidth - 40) / BOARD_SIZE);
@@ -44,7 +39,7 @@ const Chessboard: React.FC = () => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     console.log('Board state updated:', {
@@ -70,85 +65,51 @@ const Chessboard: React.FC = () => {
     );
   };
 
-  const handleClear = () => {
-    dispatch(resetGame());
-  };
-
-  const renderSquare = (row: number, col: number) => {
-    const regionId = board[row][col];
-    const region = regions.find(r => r.id === regionId);
-    const hasQueen = queens.some(q => q.row === row && q.col === col);
-    const isValidPosition = isValidQueenPlacement({row, col}, queens, regions);
-
-    return (
-      <TouchableOpacity
-        key={`${row}-${col}`}
-        style={[
-          styles.square,
-          {
-            backgroundColor: region
-              ? COLORS.REGIONS[region.id % COLORS.REGIONS.length]
-              : COLORS.WHITE_SQUARE,
-          },
-        ]}
-        onPress={() => handleSquarePress({row, col})}
-        activeOpacity={0.7}>
-        <View style={styles.squareContent}>
-          {hasQueen && <View style={styles.queen} />}
-          {!hasQueen && !isValidPosition && (
-            <View style={styles.invalidSquare} />
-          )}
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   const renderRow = (row: number) => (
     <View key={row} style={styles.row}>
       {Array(BOARD_SIZE)
         .fill(null)
-        .map((_, col) => renderSquare(row, col))}
+        .map((_, col) => {
+          const regionId = board[row][col];
+          const region = regions.find(r => r.id === regionId);
+          const hasQueen = queens.some(q => q.row === row && q.col === col);
+          const isValidPosition = isValidQueenPlacement(
+            {row, col},
+            queens,
+            regions,
+          );
+
+          return (
+            <BoardSquare
+              key={`${row}-${col}`}
+              row={row}
+              col={col}
+              squareSize={SQUARE_SIZE}
+              regionColor={
+                region
+                  ? COLORS.REGIONS[region.id % COLORS.REGIONS.length]
+                  : COLORS.WHITE_SQUARE
+              }
+              hasQueen={hasQueen}
+              isValidPosition={isValidPosition}
+              onPress={handleSquarePress}
+              board={board}
+              regionId={regionId}
+            />
+          );
+        })}
     </View>
   );
 
   return (
     <View style={styles.mainContainer}>
-      <View style={styles.header}>
-        <Text style={styles.queensCount}>
-          Queens placed: {queens.length} / {BOARD_SIZE}
-        </Text>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              queens.length === 0 && styles.buttonDisabled,
-            ]}
-            onPress={handleClear}
-            disabled={queens.length === 0}
-            activeOpacity={0.7}>
-            <Text style={styles.buttonText}>Clear</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              queens.length === 0 && styles.buttonDisabled,
-            ]}
-            onPress={() => dispatch(undoMove())}
-            disabled={queens.length === 0}
-            activeOpacity={0.7}>
-            <Text style={styles.buttonText}>Undo</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleReset}
-            activeOpacity={0.7}>
-            <Text style={styles.buttonText}>New Board</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <GameControls
+        queensCount={queens.length}
+        boardSize={BOARD_SIZE}
+        onClear={() => dispatch(resetGame())}
+        onUndo={() => dispatch(undoMove())}
+        onNewBoard={handleReset}
+      />
 
       <View style={styles.boardContainer}>
         <View style={styles.board}>
@@ -171,11 +132,6 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#f0f0f0',
     padding: 10,
-  },
-  header: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 20,
   },
   boardContainer: {
     alignItems: 'center',
@@ -205,67 +161,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: SQUARE_SIZE,
   },
-  square: {
-    width: SQUARE_SIZE,
-    height: SQUARE_SIZE,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 0.5,
-    borderColor: COLORS.PRIMARY,
-  },
-  squareContent: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  queen: {
-    width: SQUARE_SIZE * 0.7,
-    height: SQUARE_SIZE * 0.7,
-    borderRadius: SQUARE_SIZE * 0.35,
-    backgroundColor: COLORS.SECONDARY,
-  },
-  invalidSquare: {
-    width: SQUARE_SIZE * 0.15,
-    height: SQUARE_SIZE * 0.15,
-    borderRadius: SQUARE_SIZE * 0.075,
-    backgroundColor: COLORS.DANGER,
-    opacity: 0.5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 10,
-    marginTop: 10,
-  },
-  button: {
-    backgroundColor: COLORS.PRIMARY,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 8,
-    minWidth: 80,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  queensCount: {
-    fontSize: 18,
-    color: COLORS.PRIMARY,
-    fontWeight: 'bold',
-  },
   winMessage: {
     fontSize: 24,
     color: COLORS.SUCCESS,
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 20,
-  },
-  buttonDisabled: {
-    backgroundColor: COLORS.PRIMARY + '80',
-    opacity: 0.7,
   },
 });
 
